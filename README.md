@@ -1,5 +1,7 @@
 # ASM - Agent Skill Manager
 
+[中文版本 (Chinese Version)](README_CN.md)
+
 **asm** is a lightweight, zero-dependency package manager designed specifically for AI Agent Skills. It manages dependencies, versioning, and installations, similar to `npm` or `go mod`, but for agentic workflows.
 
 ## Features
