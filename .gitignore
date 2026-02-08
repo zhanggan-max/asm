@@ -1,0 +1,24 @@
+# Binaries
+asm
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Dependencies
+.asm_modules/
+vendor/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# Testing
+test/
+*.test
+coverage.out
