@@ -63,12 +63,14 @@ asm list
 
 ### 开发者助手 (Built-in Skill)
 
-本项目内置了一个名为 `asm-expert` 的 Skill（位于 `skills/asm-expert`），它可以帮助 AI Agent：
+本项目内置了一个名为 `asm-expert` 的 Skill（位于 `.gemini/skills/asm-expert`），它遵循 Gemini CLI 的标准规范。
+
+它可以帮助 AI Agent：
 - 快速理解 `asm` 的架构。
 - 自动化执行初始化和依赖管理任务。
 - 引导开发者对 `asm` 进行二次开发。
 
-如果你正在使用支持 Skill 的 Agent，可以直接让它加载该目录以获得 `asm` 的操作能力。
+如果你正在使用 Gemini CLI，它会自动发现并提示激活这个 Skill。
 
 ## 项目结构
 
