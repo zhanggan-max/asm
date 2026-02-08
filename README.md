@@ -67,6 +67,10 @@ asm list
 - **skill.lock**: Auto-generated file locking exact commit hashes.
 - **.asm_modules/**: Directory where skills are installed (flat structure).
 
+## Development
+
+If you want to contribute to **asm**, please read our [Contributing Guide](CONTRIBUTING.md).
+
 ## License
 
 MIT
