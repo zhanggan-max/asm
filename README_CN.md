@@ -61,6 +61,15 @@ asm install
 asm list
 ```
 
+### 开发者助手 (Built-in Skill)
+
+本项目内置了一个名为 `asm-expert` 的 Skill（位于 `skills/asm-expert`），它可以帮助 AI Agent：
+- 快速理解 `asm` 的架构。
+- 自动化执行初始化和依赖管理任务。
+- 引导开发者对 `asm` 进行二次开发。
+
+如果你正在使用支持 Skill 的 Agent，可以直接让它加载该目录以获得 `asm` 的操作能力。
+
 ## 项目结构
 
 - **skill.json**: 清单文件，声明直接依赖。

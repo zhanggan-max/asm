@@ -1,0 +1,11 @@
+{
+  "name": "asm-expert",
+  "version": "0.1.0",
+  "description": "An agent skill to manage and develop ASM (Agent Skill Manager) projects.",
+  "main": "index.py",
+  "capabilities": [
+    "project_initialization",
+    "dependency_management",
+    "architecture_analysis"
+  ]
+}
