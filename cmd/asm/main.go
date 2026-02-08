@@ -13,6 +13,7 @@ func usage() {
 	fmt.Println("\nCommands:")
 	fmt.Println("  init          Initialize a new skill project")
 	fmt.Println("  install [url] Install dependencies or a specific package")
+	fmt.Println("  remove <name> Remove a specific package")
 	fmt.Println("  list          List installed packages")
 	fmt.Println("  help          Show this help message")
 }
@@ -43,6 +44,17 @@ func main() {
 			pkgURL = os.Args[2]
 		}
 		if err := commands.RunInstall(pkgURL); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+
+	case "remove":
+		if len(os.Args) < 3 {
+			fmt.Fprintf(os.Stderr, "Error: package name required\n")
+			os.Exit(1)
+		}
+		pkgName := os.Args[2]
+		if err := commands.RunRemove(pkgName); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}

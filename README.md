@@ -57,6 +57,13 @@ If you have a `skill.json` or `skill.lock`:
 asm install
 ```
 
+### Remove a Skill
+
+```bash
+asm remove user/repo
+```
+This removes the dependency from `skill.json`, `skill.lock`, and deletes the directory.
+
 ### List Installed Skills
 
 ```bash

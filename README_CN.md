@@ -55,6 +55,13 @@ asm install user/repo@v1.0.0
 asm install
 ```
 
+### 移除 Skill
+
+```bash
+asm remove user/repo
+```
+这将从 `skill.json` 和 `skill.lock` 中移除依赖，并删除对应目录。
+
 ### 查看已安装列表
 
 ```bash
