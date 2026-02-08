@@ -18,7 +18,6 @@ func RunInstall(pkgSpec string) error {
 	if pkgSpec == "" {
 		return installAll()
 	}
-	// installSingle now triggers recursion
 	return installWithDependencies(pkgSpec, true)
 }
 
@@ -36,12 +35,11 @@ func installAll() error {
 
 	fmt.Println("Installing from skill.json...")
 	for name, spec := range m.Dependencies {
-		// Use the existing logic to resolve and install
 		pkgSpec := name
-		if !strings.Contains(spec, "/") && spec != "" {
+		if spec != "*" && spec != "" && !strings.Contains(spec, "/") {
 			pkgSpec = name + "@" + spec
 		} else if strings.Contains(spec, "/") {
-			pkgSpec = spec // Use direct URL
+			pkgSpec = spec
 		}
 		
 		if err := installWithDependencies(pkgSpec, false); err != nil {
@@ -51,26 +49,34 @@ func installAll() error {
 	return nil
 }
 
-// installWithDependencies installs a package AND its dependencies recursively
 func installWithDependencies(pkgSpec string, updateManifest bool) error {
-	// 1. Install the package itself
-	installName, targetDir, err := installSingleRaw(pkgSpec)
+	// Parse alias: pkg:alias
+	alias := ""
+	actualSpec := pkgSpec
+	if idx := strings.LastIndex(pkgSpec, ":"); idx > 0 && idx < len(pkgSpec)-1 {
+		// Verify it's not a git URL with colon (like git@github.com:user/repo)
+		if !strings.HasPrefix(pkgSpec, "git@") {
+			actualSpec = pkgSpec[:idx]
+			alias = pkgSpec[idx+1:]
+		}
+	}
+
+	installName, targetDir, err := installSingleRaw(actualSpec, alias)
 	if err != nil {
 		return err
 	}
 
-	// 2. Update root manifest if requested
 	if updateManifest {
 		m, _ := manifest.Load("skill.json")
 		if m != nil {
-			// Extract version from spec for manifest
-			parts := strings.Split(pkgSpec, "@")
+			parts := strings.Split(actualSpec, "@")
 			val := "*"
 			if len(parts) > 1 {
 				val = parts[1]
-			} else if strings.Contains(pkgSpec, "://") {
-				val = pkgSpec
+			} else if strings.Contains(actualSpec, "://") {
+				val = actualSpec
 			}
+			
 			if m.Dependencies == nil {
 				m.Dependencies = make(map[string]string)
 			}
@@ -79,7 +85,7 @@ func installWithDependencies(pkgSpec string, updateManifest bool) error {
 		}
 	}
 
-	// 3. RECURSION: Check the installed package's skill.json
+	// Recursion
 	subManifestPath := filepath.Join(targetDir, "skill.json")
 	if _, err := os.Stat(subManifestPath); err == nil {
 		subM, err := manifest.Load(subManifestPath)
@@ -87,13 +93,12 @@ func installWithDependencies(pkgSpec string, updateManifest bool) error {
 			fmt.Printf("  -> %s has %d dependencies, resolving...\n", installName, len(subM.Dependencies))
 			for subName, subSpec := range subM.Dependencies {
 				subPkgSpec := subName
-				if !strings.Contains(subSpec, "/") && subSpec != "" {
+				if subSpec != "*" && subSpec != "" && !strings.Contains(subSpec, "/") {
 					subPkgSpec = subName + "@" + subSpec
 				} else if strings.Contains(subSpec, "/") {
 					subPkgSpec = subSpec
 				}
 
-				// Check if already installed to prevent infinite loops/redundancy
 				if _, err := os.Stat(filepath.Join(modulesDir, subName)); err == nil {
 					continue
 				}
@@ -108,8 +113,7 @@ func installWithDependencies(pkgSpec string, updateManifest bool) error {
 	return nil
 }
 
-// installSingleRaw is the low-level "git clone" and "lock" logic
-func installSingleRaw(pkgSpec string) (name string, path string, err error) {
+func installSingleRaw(pkgSpec, alias string) (string, string, error) {
 	parts := strings.Split(pkgSpec, "@")
 	pkgName := parts[0]
 	version := ""
@@ -122,15 +126,17 @@ func installSingleRaw(pkgSpec string) (name string, path string, err error) {
 		return "", "", err
 	}
 
-	installName := utils.GetRepoName(url)
+	installName := alias
+	if installName == "" {
+		installName = utils.GetRepoName(url)
+	}
 	targetDir := filepath.Join(modulesDir, installName)
 
 	if _, err := os.Stat(targetDir); err == nil {
-		// If already exists, we skip for now (or could update)
 		return installName, targetDir, nil
 	}
 
-	fmt.Printf("Fetching %s...\n", pkgSpec)
+	fmt.Printf("Fetching %s...\n", url)
 	if err := os.MkdirAll(modulesDir, 0755); err != nil {
 		return "", "", err
 	}
@@ -139,7 +145,6 @@ func installSingleRaw(pkgSpec string) (name string, path string, err error) {
 		return "", "", err
 	}
 
-	// Update Lockfile
 	l, _ := lockfile.Load("skill.lock")
 	hash, _ := utils.GetHeadHash(targetDir)
 	l.Dependencies[installName] = lockfile.PackageLock{
@@ -165,7 +170,6 @@ func installFromLock(lock *lockfile.Lockfile) error {
 		if err := utils.CloneRepo(pkg.URL, targetDir, ""); err != nil {
 			return err
 		}
-		// In a real tool, we would 'git checkout <commit>' here
 	}
 	return nil
 }
